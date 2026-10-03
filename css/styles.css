@@ -56,6 +56,8 @@
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 84px;
+  -webkit-text-size-adjust: 100%;   /* iOS не раздувает шрифт при повороте экрана */
+  text-size-adjust: 100%;
 }
 
 body {
@@ -1327,7 +1329,13 @@ section.tight { padding-block: 72px; }
   .form-wrapper { grid-template-columns: 1fr; gap: 40px; }
 }
 
+/* Планшеты вертикально и телефоны: бургер-меню, одна колонка у крупных блоков */
 @media (max-width: 860px) {
+  html { scroll-padding-top: 72px; }
+
+  /* --- Шапка и меню --- */
+  .site-header .container { height: 64px; gap: 16px; }
+
   .nav-menu {
     display: none;
     position: absolute;
@@ -1340,6 +1348,10 @@ section.tight { padding-block: 72px; }
     background: var(--color-dark-bg);
     border-bottom: 1px solid var(--color-dark-border);
     padding: 12px var(--container-pad) 20px;
+    /* в горизонтальной ориентации меню выше экрана — даём ему свой скролл */
+    max-height: calc(100vh - 64px);
+    max-height: calc(100dvh - 64px);
+    overflow-y: auto;
   }
   .nav-menu.is-open { display: flex; }
   .nav-menu a {
@@ -1349,46 +1361,159 @@ section.tight { padding-block: 72px; }
   }
   .nav-menu a:last-child { border-bottom: none; }
 
-  .nav-toggle { display: flex; }
-  .header-actions .btn-primary { display: none; }
+  .nav-toggle { display: flex; width: 44px; height: 44px; flex-shrink: 0; }
+  .header-actions { gap: 10px; }
+  .header-actions .btn-primary { padding: 9px 12px; font-size: 13px; }
   .header-social { display: none; }
+  .case-back-link { margin-left: auto; padding-block: 10px; }
 
+  /* --- Общие отступы секций --- */
   section { padding-block: 64px; }
   section.tight { padding-block: 48px; }
+  .section-head { margin-bottom: 40px; }
 
+  /* --- Hero --- */
   .hero { padding-block: 48px 48px; }
-  .hero-stats { grid-template-columns: 1fr; gap: 20px; }
+  .hero-stats { gap: 24px; margin-top: 44px; padding-top: 32px; }
 
-  .services-grid { grid-template-columns: 1fr; }
-  .process-step { flex: 0 0 100%; }
+  /* --- Процесс: вертикальная лента (кружок слева, текст справа) --- */
+  .process-steps { flex-direction: column; flex-wrap: nowrap; gap: 28px; }
+  .process-step {
+    flex: none;
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr);
+    column-gap: 16px;
+    align-content: start;
+    padding-right: 0;
+  }
+  .process-step:not(:last-child)::before {
+    content: "";
+    position: absolute;
+    top: 48px;
+    bottom: -28px;
+    left: 24px;
+    width: 1px;
+    background: var(--terracotta-tint-line);
+  }
+  .step-circle {
+    grid-row: 1 / span 2;
+    width: 48px;
+    height: 48px;
+    font-size: 13.5px;
+    margin-bottom: 0;
+  }
+  .process-step h3 { margin-top: 2px; }
+  .process-step p { margin-top: 6px; }
+
+  /* --- Специалисты / Разработка --- */
   .stat-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .role-grid { grid-template-columns: 1fr; }
-  .pipe-grid { grid-template-columns: 1fr; }
+  .pipe-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .navy-band.cta-band { padding: 32px 28px; }
   .navy-band.accent-band { padding: 28px; }
-  .testimonials-grid { grid-template-columns: 1fr; }
+  .case-link { padding-bottom: 8px; margin-bottom: -8px; }
+
+  /* --- Страницы кейсов --- */
   .case-detail { padding-block: 48px 64px; }
   .case-overview { margin-top: 48px; }
-  .case-overview-grid { grid-template-columns: 1fr; }
   .case-gallery { margin-top: 48px; }
 
-  .form-row { grid-template-columns: 1fr; }
-  .request-form { padding: 26px; }
-
+  /* --- Футер: ссылки с областью нажатия не меньше 40px --- */
   .footer-top { grid-template-columns: 1fr 1fr; gap: 32px; }
   .footer-top .footer-cta { grid-column: span 2; }
-  .footer-bottom { flex-direction: column; align-items: flex-start; }
+  .footer-social a { width: 44px; height: 44px; }
+  .footer-col h4 { margin-bottom: 8px; }
+  .footer-col ul { gap: 0; }
+  .footer-col a { display: inline-block; padding-block: 10px; }
+  .footer-cta-link { margin-top: 4px; padding-block: 12px; }
+  .footer-bottom { flex-direction: column; align-items: flex-start; gap: 6px; margin-top: 40px; padding-top: 20px; }
+  .footer-bottom-links { flex-wrap: wrap; gap: 0 24px; }
+  .footer-bottom-links a { display: inline-block; padding-block: 10px; }
 }
 
+/* Узкие планшеты и телефоны: сетки карточек складываются в одну колонку */
+@media (max-width: 640px) {
+  .services-grid { grid-template-columns: 1fr; }
+  .role-grid { grid-template-columns: 1fr; }
+  .pipe-grid { grid-template-columns: 1fr; }
+  .testimonials-grid { grid-template-columns: 1fr; }
+  .case-overview-grid { grid-template-columns: 1fr; }
+
+  .form-row { grid-template-columns: 1fr; gap: 0; }
+  .request-form { padding: 26px; }
+}
+
+/* Телефоны: плотнее отступы, кнопки на всю ширину */
 @media (max-width: 520px) {
   :root { --container-pad: 18px; }
-  .hero-actions { flex-direction: column; align-items: stretch; }
+
+  .site-header .container { gap: 12px; }
+  /* на страницах кейсов в шапке остаются логотип и «← Все кейсы» */
+  .case-back-link + .header-actions { display: none; }
+
+  section { padding-block: 56px; }
+  section.tight { padding-block: 44px; }
+  .section-head { margin-bottom: 32px; }
+  .section-head.split { flex-direction: column; align-items: flex-start; }
+  .section-head p,
+  .hero .lead,
+  .case-hero-lead { font-size: 16px; }
+
+  .hero { padding-block: 40px 44px; }
+  .hero-actions { flex-direction: column; align-items: stretch; gap: 12px; }
   .hero-actions .btn { width: 100%; }
-  .stat-tiles { grid-template-columns: 1fr; }
+  /* цифры в строку: значение слева, подпись справа */
+  .hero-stats { grid-template-columns: 1fr; gap: 14px; margin-top: 36px; padding-top: 28px; }
+  .hero-stats .stat {
+    display: grid;
+    grid-template-columns: 88px minmax(0, 1fr);
+    column-gap: 12px;
+    align-items: baseline;
+  }
+  .hero-stats .stat-label { margin-top: 0; }
+
+  .services-grid { gap: 16px; }
+  .service-card { padding: 24px 22px; }
+  .service-card h3 { margin-top: 16px; }
+
+  .stat-tiles { gap: 12px; }
+  .stat-tile { padding: 18px 16px; }
+  .stat-tile .stat-num { font-size: 24px; }
+  .role-grid { gap: 12px; margin-top: 24px; }
+  .role-card { padding: 20px; }
+  .role-card p { font-size: 14px; }
+  .navy-band.cta-band { padding: 26px 22px; margin-top: 24px; }
+  .navy-band.accent-band { padding: 22px; gap: 16px; }
   .navy-band .btn { width: 100%; }
+
+  .dev-block { margin-top: 40px; }
+  .case-body { padding: 22px 22px 26px; }
+  .card.full-cycle { padding: 24px 22px; }
+
+  .testimonials-grid { gap: 16px; }
+  .testimonial-card { padding: 24px 22px; }
+
+  .faq-list { gap: 12px; }
+  .faq-item { padding: 20px 22px; }
+
+  .form-wrapper { gap: 32px; }
+  .form-info-list { margin-top: 24px; gap: 12px; }
+  .request-form { padding: 22px 18px; }
+  .form-field { margin-bottom: 4px; }
+
+  .case-overview-grid { gap: 14px; }
+  .case-overview-block { padding: 22px; }
+  .case-gallery-grid { gap: 14px; }
+
+  .site-footer { padding-block: 56px 24px; }
   .footer-top { grid-template-columns: 1fr; }
   .footer-top .footer-cta { grid-column: span 1; }
-  .section-head.split { flex-direction: column; align-items: flex-start; }
-  .lightbox { padding: 20px; }
-  .lightbox-close { top: 12px; right: 12px; width: 38px; height: 38px; }
+
+  .lightbox { padding: 12px; }
+  .lightbox-img { max-width: 100%; }
+  .lightbox-close { top: 12px; right: 12px; }
+}
+
+/* Самые узкие телефоны (до 360px): кнопка в шапке уже не помещается */
+@media (max-width: 359px) {
+  .header-actions .btn-primary { display: none; }
 }
