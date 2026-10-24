@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Static one-page marketing site for Avilon.IT (IT outsourcing/outstaffing, Crimea). Plain HTML/CSS/JS — no framework, no bundler, no build step. `index.html` is currently the only page; `css/styles.css` and `js/main.js` are written to be shared by future pages (`services.html`, `contacts.html`, etc.) rather than duplicated per page. The frontend has no `package.json` of its own — but `server/` (see below) does, since it's a real Node backend.
+Static marketing site for Avilon.IT (IT outsourcing/outstaffing, Crimea). Plain HTML/CSS/JS — no framework, no bundler, no build step. Pages: `index.html` plus case studies in `cases/*.html`; `css/styles.css` and `js/main.js` are shared by all pages rather than duplicated per page. The request form is handled by a small PHP script in `api/` (see below). The frontend has no `package.json` of its own — `server/` (an older Node backend, not deployed) does.
+
+**Hosting (production):** Timeweb virtual (shared) hosting, account `cr949641`, site directory `avilon-it/public_html` (PHP 8.2, Apache — no Node.js). Domain `avilon-it.ru` (bought 2026-10-24, registration was still pending that day; free Let's Encrypt SSL to be enabled once it resolves); technical domain `cr949641.tw1.ru`. There is no git/CI deploy: the user uploads files through the Timeweb file manager, usually as a zip Claude builds with Windows' `tar.exe -a -c -f x.zip ...` (Git Bash's `tar` produces a tar, not a zip). Upload only `index.html`, `css/`, `js/`, `assets/`, `cases/`, `api/` (with the real `api/config.php`) — never `server/`, `CLAUDE.md`, `README.md`. Folder permissions on the host: 755, files 644. GitHub Pages still serves an old copy but is no longer the production site.
 
 **Naming:** the company was renamed from TAVRIDA.IT to **Avilon.IT** (logo markup `Avilon<span>.IT</span>`, contact email `hello@avilon.it`). The GitHub repo is `legomario11113-star/avilon-it-site` (formerly `tavrida-it-site`), served by GitHub Pages at `https://legomario11113-star.github.io/avilon-it-site/` — the Pages origin `https://legomario11113-star.github.io` (used for `CORS_ORIGIN`) is unaffected by the rename. The local checkout lives at `Desktop/Avilon_IT/avilon-it-site` (renamed from `Tavrida_IT/tavrida-it-site`). Any "TAVRIDA" in old commits is the previous name, not something to restore. The `#testimonials` section was removed entirely — don't recreate it unless asked.
 
@@ -14,7 +16,8 @@ The static site itself has no build/lint/test tooling (no root `package.json`).
 
 - **Preview locally**: open `index.html` directly in a browser, or `npx serve .` from the repo root.
 - **Verifying visual/behavioral changes on the frontend**: there's no permanent test suite. The established pattern for this repo is to temporarily install Playwright (`npm install --no-save playwright`, `npx playwright install chromium`), drive `file:///.../index.html` with a throwaway script to screenshot at desktop (1440px) and mobile (375px) widths and check `document.documentElement.scrollWidth` for horizontal overflow, then delete `node_modules`/`package.json`/`package-lock.json`/screenshots before committing. Keep this out of git — the repo root should stay dependency-free.
-- **Backend** (`server/`): `cd server && npm install && cp .env.example .env`, then `npm run dev` (nodemon) or `npm start`. See `server/README.md` for the full local-run and VPS-deploy checklist. `server/` has its own `.gitignore`-d `node_modules/`, `.env`, and `data/` (the SQLite file) — `package-lock.json` IS committed.
+- **Form handler** (`api/request.php`, the one in production): no PHP is installed on the user's machine. To test, download a portable PHP 8.2 NTS zip from `windows.php.net/downloads/releases/` into the scratchpad, enable `pdo_sqlite`, `openssl`, `mbstring` in its `php.ini`, copy `index.html` + `api/` into `<scratch>/site/public_html/` (so the DB lands in `<scratch>/site/data/`, not in the repo) and run `php -S 127.0.0.1:8099` there. Send Cyrillic test payloads as `\uXXXX` JSON escapes or `--data-binary @file` — Git Bash mangles raw Cyrillic in curl args. `api/.htaccess` isn't applied by `php -S`.
+- **Old Node backend** (`server/`, not deployed — kept for a possible future VPS): `cd server && npm install && cp .env.example .env`, then `npm run dev` (nodemon) or `npm start`. See `server/README.md` for the full local-run and VPS-deploy checklist. `server/` has its own `.gitignore`-d `node_modules/`, `.env`, and `data/` (the SQLite file) — `package-lock.json` IS committed.
 - **Running the full stack locally**: two processes — backend `cd server && npm run dev` (port 3000) and frontend `npx serve . -l 5500` from the repo root (pick a port other than 3000, `serve` defaults to it). Open the site via that `http://localhost:5500`, **not** `file://`: the backend's CORS allows exactly one origin (`CORS_ORIGIN` in `server/.env`), so for local testing set it to the exact address in the browser bar (`localhost` and `127.0.0.1` count as different origins), and set it back to `https://legomario11113-star.github.io` before deploying. `.env` is read only at startup — restart after editing it. Never re-run `cp .env.example .env` on a configured setup, it overwrites the real values. With `SMTP_*` empty, submissions are still saved and the API returns `{ ok: true, warning }`; there is no email/delivery log in the DB (only the `submissions` table). SMTP for the owner's mailbox is `smtp.mail.ru:465` with a Mail.ru "app password" (real credentials live only in the git-ignored `.env`).
 - **Stopping stray processes** on Windows PowerShell: `Stop-Process -Id (Get-NetTCPConnection -LocalPort 3000 -State Listen).OwningProcess -Force` (same for 5500); an `ObjectNotFound` error just means nothing is listening.
 
@@ -28,15 +31,17 @@ All colors/spacing/radii live as CSS custom properties at the top of `css/styles
 
 The visual design was reverse-engineered from a PDF export of a Claude-Design mockup the user provided (not from the original text brief, which turned out to be a rougher approximation). If a future redesign request references "the mockup" again, ask for a fresh export/screenshot rather than assuming the old text brief still applies — the two disagreed significantly last time (card styles, section colors, hero illustration, etc.).
 
-### Request form → own backend (server/)
+### Request form → PHP handler (api/)
 
-The `#request` section's `<form id="request-form">` no longer uses Formspree — it POSTs JSON to a self-hosted backend in `server/` (Express + better-sqlite3 + nodemailer), submitted via `fetch` from the inline `<script>` at the bottom of `index.html` (not from `js/main.js`). Important non-obvious point: **the section id is `#request`, not `#request-form`** — the form element itself owns `id="request-form"`. This split is intentional: giving both the wrapping `<section>` and the `<form>` the same id would be invalid HTML and would break `document.getElementById('request-form')` (it would resolve to the section, not the form, since it's first in document order). All in-page anchors (`header`, hero CTA, footer CTA) point to `#request`.
+The `#request` section's `<form id="request-form">` POSTs JSON to `api/request.php` (same origin, so no CORS) — submitted via `fetch` from the inline `<script>` at the bottom of `index.html` (not from `js/main.js`). Important non-obvious point: **the section id is `#request`, not `#request-form`** — the form element itself owns `id="request-form"`. This split is intentional: giving both the wrapping `<section>` and the `<form>` the same id would be invalid HTML and would break `document.getElementById('request-form')` (it would resolve to the section, not the form, since it's first in document order). All in-page anchors (`header`, hero CTA, footer CTA) point to `#request`.
 
-The inline script's `API_URL` constant is currently `http://localhost:3000/api/request` with a `// TODO: заменить на адрес сервера после деплоя` comment — it must be updated to the real backend URL once `server/` is deployed (see `server/README.md`). The frontend sends JSON (`first_name`, `last_name`, `email`, `phone`, `message`, `website`) and expects `{ ok: true }` / `{ ok: false, error }` back — not Formspree's `{ errors: [...] }` shape.
+The inline script's `API_URL` is the relative `'api/request.php'` (works because `index.html` sits at the site root; the form exists only there). The frontend sends JSON (`first_name`, `last_name`, `email`, `phone`, `message`, `website`) and expects `{ ok: true }` / `{ ok: true, warning }` / `{ ok: false, error }` back.
 
-`server/routes/request.js` has its own honeypot field (`website`, matching the hidden input in the form) — unrelated to Formspree's old `_gotcha`/`_subject` fields, which were removed from the form entirely along with the `action` attribute.
+`api/request.php` (plain PHP 8.2, no Composer) mirrors what the Node backend did: honeypot `website` (filled → silent `{ ok: true }`), server-side validation, rate limit 5 submissions per IP per 10 minutes (counted from the `submissions` table), saves to SQLite via PDO at `db_path` (default `avilon-it/data/submissions.sqlite`, i.e. **outside** `public_html` so it can't be downloaded), and emails via a minimal built-in SMTP client (SSL 465 or STARTTLS 587, AUTH LOGIN) — Timeweb's panel has an "Отправка SMTP" switch that may need to be on for outbound SMTP. If only one of save/email succeeds it still answers `ok: true` with a `warning`, so the visitor doesn't resubmit. Settings (recipient, Mail.ru SMTP app password) live in git-ignored `api/config.php`, template `api/config.example.php`; `api/.htaccess` denies web access to both. Errors go to PHP `error_log` (Timeweb "Логи").
 
-`js/main.js`'s `initRequestForm()` function is dead code — it looks for a `[data-request-form]` attribute that doesn't exist on the form (removed back when the form was first wired to Formspree, and still absent now). It's harmless (returns early, no-op) but was intentionally left alone rather than removed, since form-related tasks have repeatedly been scoped to `index.html`/`server/` only. Don't be confused into thinking form submission is handled there; the real logic is the inline script in `index.html`, which now talks to `server/`.
+`server/` (Express + better-sqlite3 + nodemailer) is the previous implementation, written for a VPS. It isn't deployed — Timeweb shared hosting can't run a persistent Node process. Its `server/src/routes/request.js` has the same honeypot/validation/response contract.
+
+`js/main.js`'s `initRequestForm()` function is dead code — it looks for a `[data-request-form]` attribute that doesn't exist on the form (removed back when the form was first wired to Formspree, and still absent now). It's harmless (returns early, no-op) but was intentionally left alone rather than removed, since form-related tasks have repeatedly been scoped to `index.html`/`api/` only. Don't be confused into thinking form submission is handled there; the real logic is the inline script in `index.html`, which talks to `api/request.php`.
 
 ### Form validation (client-side)
 
@@ -67,13 +72,24 @@ All icons are inline SVG (hand-written paths), no icon library/sprite sheet.
 
 ## Что это
 
-Статический одностраничный сайт-визитка Avilon.IT (IT-аутсорсинг/аутстаффинг,
-Крым). Чистые HTML/CSS/JS — без фреймворка, без сборщика, без шага сборки.
-`index.html` сейчас единственная страница; `css/styles.css` и `js/main.js`
-написаны так, чтобы их переиспользовали будущие страницы (`services.html`,
-`contacts.html` и т.д.), а не дублировали для каждой. У самого фронтенда нет
-своего `package.json` — а вот у `server/` (см. ниже) есть, это настоящий
-Node-бэкенд.
+Статический сайт-визитка Avilon.IT (IT-аутсорсинг/аутстаффинг, Крым). Чистые
+HTML/CSS/JS — без фреймворка, без сборщика, без шага сборки. Страницы:
+`index.html` и кейсы в `cases/*.html`; `css/styles.css` и `js/main.js` общие
+для всех страниц, а не дублируются. Форму заявки обрабатывает небольшой
+PHP-скрипт в `api/` (см. ниже). У самого фронтенда нет своего `package.json` —
+он есть у `server/` (старый Node-бэкенд, не задеплоен).
+
+**Хостинг (боевой):** виртуальный хостинг Timeweb, аккаунт `cr949641`, папка
+сайта `avilon-it/public_html` (PHP 8.2, Apache — Node.js нет). Домен
+`avilon-it.ru` (куплен 2026-10-24, в тот день ещё регистрировался; бесплатный
+SSL Let's Encrypt включить, когда домен заработает); технический домен
+`cr949641.tw1.ru`. Деплоя через git/CI нет: пользователь загружает файлы через
+файловый менеджер Timeweb, обычно zip-архивом, который Claude собирает
+Windows-овским `tar.exe -a -c -f x.zip ...` (`tar` из Git Bash делает tar, а
+не zip). Загружать только `index.html`, `css/`, `js/`, `assets/`, `cases/`,
+`api/` (с настоящим `api/config.php`) — никогда `server/`, `CLAUDE.md`,
+`README.md`. Права на хостинге: папки 755, файлы 644. На GitHub Pages ещё
+лежит старая копия, но боевым сайтом она больше не является.
 
 **Название:** компания переименована с TAVRIDA.IT на **Avilon.IT** (разметка логотипа
 `Avilon<span>.IT</span>`, почта `hello@avilon.it`). Репозиторий на GitHub —
@@ -102,8 +118,17 @@ Pages — `https://legomario11113-star.github.io/avilon-it-site/`; origin Pages
   `node_modules`/`package.json`/`package-lock.json`/скриншоты перед коммитом.
   Всё это не должно попадать в git — корень репозитория должен оставаться без
   зависимостей.
-- **Backend** (`server/`): `cd server && npm install && cp .env.example .env`,
-  затем `npm run dev` (nodemon) или `npm start`. Полный чек-лист локального
+- **Обработчик формы** (`api/request.php`, он и работает на сайте): PHP на
+  компьютере пользователя не установлен. Для теста скачать портативный PHP 8.2
+  NTS zip с `windows.php.net/downloads/releases/` в scratchpad, включить в его
+  `php.ini` `pdo_sqlite`, `openssl`, `mbstring`, скопировать `index.html` +
+  `api/` в `<scratch>/site/public_html/` (чтобы база создалась в
+  `<scratch>/site/data/`, а не в репозитории) и запустить там
+  `php -S 127.0.0.1:8099`. Кириллицу в тестовых запросах слать как
+  `\uXXXX`-экранирование в JSON или через `--data-binary @файл` — Git Bash
+  портит кириллицу в аргументах curl. `api/.htaccess` в `php -S` не действует.
+- **Старый Node-бэкенд** (`server/`, не задеплоен — оставлен на случай VPS):
+  `cd server && npm install && cp .env.example .env`, затем `npm run dev` (nodemon) или `npm start`. Полный чек-лист локального
   запуска и деплоя на VPS — в `server/README.md`. У `server/` свой
   `.gitignore`-нутый `node_modules/`, `.env` и `data/` (файл SQLite) —
   `package-lock.json` при этом закоммичен.
@@ -149,11 +174,10 @@ Pages — `https://legomario11113-star.github.io/avilon-it-site/`; origin Pages
 старый текстовый бриф всё ещё актуален — в прошлый раз они заметно расходились
 (стиль карточек, цвета секций, иллюстрация в hero и т.д.).
 
-### Форма заявки → собственный backend (server/)
+### Форма заявки → PHP-обработчик (api/)
 
-Форма `<form id="request-form">` внутри секции `#request` больше не использует
-Formspree — она отправляет JSON на свой собственный backend в `server/`
-(Express + better-sqlite3 + nodemailer), через `fetch` из инлайнового
+Форма `<form id="request-form">` внутри секции `#request` отправляет JSON на
+`api/request.php` (тот же origin, поэтому CORS не нужен) через `fetch` из инлайнового
 `<script>` в конце `index.html` (а не из `js/main.js`). Важный неочевидный
 момент: **id секции — `#request`, а не `#request-form`** — сам элемент
 `<form>` владеет id `request-form`. Это разделение сделано намеренно: если и
@@ -162,26 +186,38 @@ HTML и сломает `document.getElementById('request-form')` (он верн�
 не форму, так как она первая в порядке документа). Все внутренние якоря
 (шапка, кнопка в hero, кнопка в футере) ведут на `#request`.
 
-Константа `API_URL` в инлайновом скрипте сейчас равна
-`http://localhost:3000/api/request` с комментарием
-`// TODO: заменить на адрес сервера после деплоя` — её нужно обновить на
-реальный адрес backend после деплоя `server/` (см. `server/README.md`).
-Фронтенд шлёт JSON (`first_name`, `last_name`, `email`, `phone`, `message`,
-`website`) и ждёт в ответ `{ ok: true }` / `{ ok: false, error }` — это НЕ
-формат Formspree (`{ errors: [...] }`).
+Константа `API_URL` в инлайновом скрипте — относительный путь
+`'api/request.php'` (работает, потому что `index.html` лежит в корне сайта;
+форма есть только там). Фронтенд шлёт JSON (`first_name`, `last_name`,
+`email`, `phone`, `message`, `website`) и ждёт в ответ `{ ok: true }` /
+`{ ok: true, warning }` / `{ ok: false, error }`.
 
-У `server/routes/request.js` свой honeypot-механизм (поле `website`,
-совпадает со скрытым полем в форме) — он не связан со старыми полями
-Formspree `_gotcha`/`_subject`, которые вместе с атрибутом `action` были
-полностью убраны из формы.
+`api/request.php` (чистый PHP 8.2, без Composer) повторяет логику
+Node-бэкенда: honeypot `website` (заполнено → тихий `{ ok: true }`), проверка
+полей на сервере, лимит 5 заявок с IP за 10 минут (считается по таблице
+`submissions`), сохранение в SQLite через PDO по пути `db_path` (по умолчанию
+`avilon-it/data/submissions.sqlite`, то есть **вне** `public_html`, чтобы базу
+нельзя было скачать) и письмо через встроенный минимальный SMTP-клиент (SSL 465
+или STARTTLS 587, AUTH LOGIN) — в панели Timeweb есть переключатель «Отправка
+SMTP», который может понадобиться включить. Если удалось только одно из двух
+(сохранить или отправить), ответ всё равно `ok: true` с `warning`, чтобы
+посетитель не отправлял заявку повторно. Настройки (получатель, пароль
+приложения Mail.ru) — в `api/config.php`, который в git не попадает; шаблон —
+`api/config.example.php`; `api/.htaccess` закрывает оба от браузера. Ошибки
+пишутся в `error_log` PHP (раздел «Логи» в Timeweb).
+
+`server/` (Express + better-sqlite3 + nodemailer) — предыдущая реализация,
+написанная под VPS. Не задеплоена: виртуальный хостинг Timeweb не держит
+постоянно работающий Node-процесс. Его `server/src/routes/request.js` имеет
+тот же контракт honeypot/проверок/ответов.
 
 Функция `initRequestForm()` в `js/main.js` — мёртвый код: она ищет атрибут
 `[data-request-form]`, которого на форме нет (его убрали ещё когда форму
 впервые подключали к Formspree, и его до сих пор нет). Функция безобидна
 (просто выходит рано, ничего не делает), но её намеренно оставили как есть, а
 не удалили, поскольку задачи по форме раз за разом ограничивались только
-`index.html`/`server/`. Не путать: обработка отправки формы происходит не там,
-а в инлайновом скрипте в `index.html`, который теперь обращается к `server/`.
+`index.html`/`api/`. Не путать: обработка отправки формы происходит не там,
+а в инлайновом скрипте в `index.html`, который обращается к `api/request.php`.
 
 ### Валидация формы (на клиенте)
 

@@ -3,3 +3,6 @@ server/node_modules/
 server/.env
 server/data/
 server/*.log
+
+# PHP-обработчик формы (api/): настройки с паролем
+api/config.php
