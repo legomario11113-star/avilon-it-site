@@ -30,5 +30,5 @@ app.get('/health', (req, res) => res.json({ ok: true }));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`TAVRIDA.IT backend слушает порт ${PORT}`);
+  console.log(`Avilon.IT backend слушает порт ${PORT}`);
 });

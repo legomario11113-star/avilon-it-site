@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Static one-page marketing site for TAVRIDA.IT (IT outsourcing/outstaffing, Crimea). Plain HTML/CSS/JS — no framework, no bundler, no build step. `index.html` is currently the only page; `css/styles.css` and `js/main.js` are written to be shared by future pages (`services.html`, `contacts.html`, etc.) rather than duplicated per page. The frontend has no `package.json` of its own — but `server/` (see below) does, since it's a real Node backend.
+Static one-page marketing site for Avilon.IT (IT outsourcing/outstaffing, Crimea). Plain HTML/CSS/JS — no framework, no bundler, no build step. `index.html` is currently the only page; `css/styles.css` and `js/main.js` are written to be shared by future pages (`services.html`, `contacts.html`, etc.) rather than duplicated per page. The frontend has no `package.json` of its own — but `server/` (see below) does, since it's a real Node backend.
 
 ## Commands
 
@@ -65,7 +65,7 @@ All icons are inline SVG (hand-written paths), no icon library/sprite sheet.
 
 ## Что это
 
-Статический одностраничный сайт-визитка TAVRIDA.IT (IT-аутсорсинг/аутстаффинг,
+Статический одностраничный сайт-визитка Avilon.IT (IT-аутсорсинг/аутстаффинг,
 Крым). Чистые HTML/CSS/JS — без фреймворка, без сборщика, без шага сборки.
 `index.html` сейчас единственная страница; `css/styles.css` и `js/main.js`
 написаны так, чтобы их переиспользовали будущие страницы (`services.html`,

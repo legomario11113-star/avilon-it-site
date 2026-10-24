@@ -1,4 +1,4 @@
-# TAVRIDA.IT — backend формы заявки
+# Avilon.IT — backend формы заявки
 
 Node.js + Express сервис, принимающий `POST /api/request` с сайта, сохраняющий
 заявку в SQLite и отправляющий письмо-уведомление на почту.
@@ -48,17 +48,17 @@ npm start
 3. **PM2** — запустить процесс и держать его живым:
    ```bash
    npm install -g pm2
-   pm2 start src/index.js --name tavrida-it-backend
+   pm2 start src/index.js --name avilon-it-backend
    pm2 save
    pm2 startup   # чтобы PM2 поднимался при перезагрузке сервера
    ```
 4. **Nginx** — reverse proxy с домена/поддомена (например,
-   `api.tavrida.it`) на `127.0.0.1:3000`, только `POST /api/request` наружу
+   `api.avilon.it`) на `127.0.0.1:3000`, только `POST /api/request` наружу
    действительно нужен.
 5. **Certbot** — выпустить и подключить HTTPS-сертификат для домена Nginx:
    ```bash
-   sudo certbot --nginx -d api.tavrida.it
+   sudo certbot --nginx -d api.avilon.it
    ```
 6. После получения адреса backend — обновить в `index.html` константу
    `API_URL` (сейчас там `http://localhost:3000/api/request`) на реальный
-   `https://api.tavrida.it/api/request`.
+   `https://api.avilon.it/api/request`.

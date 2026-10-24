@@ -1,5 +1,5 @@
 /* =========================================================
-   TAVRIDA.IT — общие стили сайта
+   Avilon.IT — общие стили сайта
    Используются на всех страницах (index.html, services.html, contacts.html и т.д.)
    ========================================================= */
 
@@ -801,73 +801,8 @@ section.tight { padding-block: 72px; }
   color: #C4622D;
 }
 
-/* ---------- Testimonials ---------- */
-.testimonials { background: var(--color-bg); }
-
-.testimonials-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 24px;
-}
-
-.testimonial-card {
-  background: var(--color-bg-card);
-  border: 1px dashed var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: 30px;
-  display: flex;
-  flex-direction: column;
-}
-
-.stars {
-  display: flex;
-  gap: 4px;
-  color: #E8A73E;
-}
-
-.stars svg { width: 17px; height: 17px; }
-
-.testimonial-quote {
-  margin-top: 18px;
-  font-size: 15px;
-  font-style: italic;
-  color: var(--color-text-muted);
-  flex-grow: 1;
-}
-
-.testimonial-footer {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 22px;
-  padding-top: 20px;
-  border-top: 1px dashed var(--color-border);
-}
-
-.testimonial-avatar {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: var(--color-bg-raised);
-  flex-shrink: 0;
-}
-
-.testimonial-who strong {
-  display: block;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--color-text);
-}
-
-.testimonial-who span {
-  display: block;
-  font-size: 13px;
-  color: var(--color-text-muted);
-  margin-top: 2px;
-}
-
 /* ---------- FAQ ---------- */
-#faq { background: var(--color-bg-raised); }
+#faq { background: var(--color-bg); }
 
 .faq-list {
   max-width: 800px;
@@ -1323,7 +1258,6 @@ section.tight { padding-block: 72px; }
   .process-steps::before { display: none; }
   .process-step { flex: 0 0 calc(33.333% - 14px); }
   .role-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .testimonials-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .footer-top { grid-template-columns: 1.2fr 1fr 1fr; }
   .footer-top .footer-cta { grid-column: span 3; }
   .form-wrapper { grid-template-columns: 1fr; gap: 40px; }
@@ -1435,7 +1369,6 @@ section.tight { padding-block: 72px; }
   .services-grid { grid-template-columns: 1fr; }
   .role-grid { grid-template-columns: 1fr; }
   .pipe-grid { grid-template-columns: 1fr; }
-  .testimonials-grid { grid-template-columns: 1fr; }
   .case-overview-grid { grid-template-columns: 1fr; }
 
   .form-row { grid-template-columns: 1fr; gap: 0; }
@@ -1489,8 +1422,6 @@ section.tight { padding-block: 72px; }
   .case-body { padding: 22px 22px 26px; }
   .card.full-cycle { padding: 24px 22px; }
 
-  .testimonials-grid { gap: 16px; }
-  .testimonial-card { padding: 24px 22px; }
 
   .faq-list { gap: 12px; }
   .faq-item { padding: 20px 22px; }
