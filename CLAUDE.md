@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Static one-page marketing site for Avilon.IT (IT outsourcing/outstaffing, Crimea). Plain HTML/CSS/JS — no framework, no bundler, no build step. `index.html` is currently the only page; `css/styles.css` and `js/main.js` are written to be shared by future pages (`services.html`, `contacts.html`, etc.) rather than duplicated per page. The frontend has no `package.json` of its own — but `server/` (see below) does, since it's a real Node backend.
 
+**Naming:** the company was renamed from TAVRIDA.IT to **Avilon.IT** (logo markup `Avilon<span>.IT</span>`, contact email `hello@avilon.it`). The GitHub repo is `legomario11113-star/avilon-it-site` (formerly `tavrida-it-site`), served by GitHub Pages at `https://legomario11113-star.github.io/avilon-it-site/` — the Pages origin `https://legomario11113-star.github.io` (used for `CORS_ORIGIN`) is unaffected by the rename. The local folder may still be called `tavrida-it-site`; that's just the old checkout path. Any "TAVRIDA" in old commits is the previous name, not something to restore. The `#testimonials` section was removed entirely — don't recreate it unless asked.
+
 ## Commands
 
 The static site itself has no build/lint/test tooling (no root `package.json`).
@@ -72,6 +74,16 @@ All icons are inline SVG (hand-written paths), no icon library/sprite sheet.
 `contacts.html` и т.д.), а не дублировали для каждой. У самого фронтенда нет
 своего `package.json` — а вот у `server/` (см. ниже) есть, это настоящий
 Node-бэкенд.
+
+**Название:** компания переименована с TAVRIDA.IT на **Avilon.IT** (разметка логотипа
+`Avilon<span>.IT</span>`, почта `hello@avilon.it`). Репозиторий на GitHub —
+`legomario11113-star/avilon-it-site` (раньше `tavrida-it-site`), сайт на GitHub
+Pages — `https://legomario11113-star.github.io/avilon-it-site/`; origin Pages
+`https://legomario11113-star.github.io` (он же `CORS_ORIGIN`) от переименования
+не изменился. Локальная папка может по-прежнему называться `tavrida-it-site` —
+это просто старый путь. «TAVRIDA» в старых коммитах — прежнее название, его не
+возвращать. Секция `#testimonials` (отзывы) удалена полностью — не возвращать без
+запроса.
 
 ## Команды
 
