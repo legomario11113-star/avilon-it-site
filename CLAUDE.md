@@ -8,7 +8,7 @@ Static marketing site for Avilon.IT (IT outsourcing/outstaffing, Crimea). Plain 
 
 **Hosting (production):** Timeweb virtual (shared) hosting, account `cr949641`, site directory `avilon-it/public_html` (PHP 8.2, Apache — no Node.js). Domain `avilon-it.ru` (bought 2026-10-24, registration was still pending that day; free Let's Encrypt SSL to be enabled once it resolves); technical domain `cr949641.tw1.ru`. There is no git/CI deploy: the user uploads files through the Timeweb file manager, usually as a zip Claude builds with Windows' `tar.exe -a -c -f x.zip ...` (Git Bash's `tar` produces a tar, not a zip). Upload only `index.html`, `css/`, `js/`, `assets/`, `cases/`, `api/` (with the real `api/config.php`) — never `server/`, `CLAUDE.md`, `README.md`. Folder permissions on the host: 755, files 644. GitHub Pages still serves an old copy but is no longer the production site.
 
-**Naming:** the company was renamed from TAVRIDA.IT to **Avilon.IT** (logo markup `Avilon<span>.IT</span>`, contact email `hello@avilon.it`). The GitHub repo is `legomario11113-star/avilon-it-site` (formerly `tavrida-it-site`), served by GitHub Pages at `https://legomario11113-star.github.io/avilon-it-site/` — the Pages origin `https://legomario11113-star.github.io` (used for `CORS_ORIGIN`) is unaffected by the rename. The local checkout lives at `Desktop/Avilon_IT/avilon-it-site` (renamed from `Tavrida_IT/tavrida-it-site`). Any "TAVRIDA" in old commits is the previous name, not something to restore. The `#testimonials` section was removed entirely — don't recreate it unless asked.
+**Naming:** the company was renamed from TAVRIDA.IT to **Avilon.IT** (logo markup `Avilon<span>.IT</span>`, contact email `avilon-it@mail.ru`, Telegram `@AvilonIT`; form submissions go to the same mailbox). The GitHub repo is `legomario11113-star/avilon-it-site` (formerly `tavrida-it-site`), served by GitHub Pages at `https://legomario11113-star.github.io/avilon-it-site/` — the Pages origin `https://legomario11113-star.github.io` (used for `CORS_ORIGIN`) is unaffected by the rename. The local checkout lives at `Desktop/Avilon_IT/avilon-it-site` (renamed from `Tavrida_IT/tavrida-it-site`). Any "TAVRIDA" in old commits is the previous name, not something to restore. The `#testimonials` section was removed entirely — don't recreate it unless asked.
 
 ## Commands
 
@@ -92,7 +92,7 @@ Windows-овским `tar.exe -a -c -f x.zip ...` (`tar` из Git Bash дела�
 лежит старая копия, но боевым сайтом она больше не является.
 
 **Название:** компания переименована с TAVRIDA.IT на **Avilon.IT** (разметка логотипа
-`Avilon<span>.IT</span>`, почта `hello@avilon.it`). Репозиторий на GitHub —
+`Avilon<span>.IT</span>`, почта `avilon-it@mail.ru`, Telegram `@AvilonIT`; заявки с формы приходят на эту же почту). Репозиторий на GitHub —
 `legomario11113-star/avilon-it-site` (раньше `tavrida-it-site`), сайт на GitHub
 Pages — `https://legomario11113-star.github.io/avilon-it-site/`; origin Pages
 `https://legomario11113-star.github.io` (он же `CORS_ORIGIN`) от переименования
