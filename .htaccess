@@ -1,0 +1,7 @@
+# Перенаправление всех посетителей с http:// на https://.
+# Timeweb принимает HTTPS на своём прокси, а до Apache запрос доходит уже по http,
+# поэтому протокол смотрим в заголовке X-Forwarded-Proto.
+# Загружать на хостинг только после того, как SSL-сертификат получит статус «Установлен».
+RewriteEngine On
+RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+RewriteRule .* https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]

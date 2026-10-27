@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Static marketing site for Avilon.IT (IT outsourcing/outstaffing, Crimea). Plain HTML/CSS/JS — no framework, no bundler, no build step. Pages: `index.html` plus case studies in `cases/*.html`; `css/styles.css` and `js/main.js` are shared by all pages rather than duplicated per page. The request form is handled by a small PHP script in `api/` (see below). The frontend has no `package.json` of its own — `server/` (an older Node backend, not deployed) does.
 
-**Hosting (production):** Timeweb virtual (shared) hosting, account `cr949641`, site directory `avilon-it/public_html` (PHP 8.2, Apache — no Node.js). Domain `avilon-it.ru` (bought 2026-10-24, registration was still pending that day; free Let's Encrypt SSL to be enabled once it resolves); technical domain `cr949641.tw1.ru`. There is no git/CI deploy: the user uploads files through the Timeweb file manager, usually as a zip Claude builds with Windows' `tar.exe -a -c -f x.zip ...` (Git Bash's `tar` produces a tar, not a zip). Upload only `index.html`, `css/`, `js/`, `assets/`, `cases/`, `api/` (with the real `api/config.php`) — never `server/`, `CLAUDE.md`, `README.md`. Folder permissions on the host: 755, files 644. GitHub Pages still serves an old copy but is no longer the production site.
+**Hosting (production):** Timeweb virtual (shared) hosting, account `cr949641`, site directory `avilon-it/public_html` (PHP 8.2, Apache — no Node.js). Domain `avilon-it.ru` (bought 2026-10-24, registration was still pending that day; free Let's Encrypt SSL to be enabled once it resolves); technical domain `cr949641.tw1.ru`. There is no git/CI deploy: the user uploads files through the Timeweb file manager, usually as a zip Claude builds with Windows' `tar.exe -a -c -f x.zip ...` (Git Bash's `tar` produces a tar, not a zip). Upload only `index.html`, `.htaccess` (root, http→https redirect via `X-Forwarded-Proto`; only once the SSL cert is installed), `css/`, `js/`, `assets/`, `cases/`, `api/` (with the real `api/config.php`) — never `server/`, `CLAUDE.md`, `README.md`. Folder permissions on the host: 755, files 644. GitHub Pages still serves an old copy but is no longer the production site.
 
 **Naming:** the company was renamed from TAVRIDA.IT to **Avilon.IT** (logo markup `Avilon<span>.IT</span>`, contact email `avilon-it@mail.ru`, Telegram `@AvilonIT`; form submissions go to the same mailbox). The GitHub repo is `legomario11113-star/avilon-it-site` (formerly `tavrida-it-site`), served by GitHub Pages at `https://legomario11113-star.github.io/avilon-it-site/` — the Pages origin `https://legomario11113-star.github.io` (used for `CORS_ORIGIN`) is unaffected by the rename. The local checkout lives at `Desktop/Avilon_IT/avilon-it-site` (renamed from `Tavrida_IT/tavrida-it-site`). Any "TAVRIDA" in old commits is the previous name, not something to restore. The `#testimonials` section was removed entirely — don't recreate it unless asked.
 
@@ -16,7 +16,7 @@ The static site itself has no build/lint/test tooling (no root `package.json`).
 
 - **Preview locally**: open `index.html` directly in a browser, or `npx serve .` from the repo root.
 - **Verifying visual/behavioral changes on the frontend**: there's no permanent test suite. The established pattern for this repo is to temporarily install Playwright (`npm install --no-save playwright`, `npx playwright install chromium`), drive `file:///.../index.html` with a throwaway script to screenshot at desktop (1440px) and mobile (375px) widths and check `document.documentElement.scrollWidth` for horizontal overflow, then delete `node_modules`/`package.json`/`package-lock.json`/screenshots before committing. Keep this out of git — the repo root should stay dependency-free.
-- **Form handler** (`api/request.php`, the one in production): no PHP is installed on the user's machine. To test, download a portable PHP 8.2 NTS zip from `windows.php.net/downloads/releases/` into the scratchpad, enable `pdo_sqlite`, `openssl`, `mbstring` in its `php.ini`, copy `index.html` + `api/` into `<scratch>/site/public_html/` (so the DB lands in `<scratch>/site/data/`, not in the repo) and run `php -S 127.0.0.1:8099` there. Send Cyrillic test payloads as `\uXXXX` JSON escapes or `--data-binary @file` — Git Bash mangles raw Cyrillic in curl args. `api/.htaccess` isn't applied by `php -S`.
+- **Form handler** (`api/request.php`, the one in production): a portable PHP 8.2 NTS (from `windows.php.net/downloads/releases/`, with `pdo_sqlite`, `openssl`, `mbstring` enabled in its `php.ini`) lives in `C:\php` since 2026-10-26 — not on PATH. The user runs it from the repo root: `C:\php\php.exe -c C:\php\php.ini -S 127.0.0.1:8099`, then opens `http://127.0.0.1:8099` (not `npx serve`/port 5500 — that can't execute PHP). From the repo root the default `db_path` resolves to `Desktop/Avilon_IT/data/submissions.sqlite`, outside the repo. With the real `api/config.php` present, local submissions send real email. Send Cyrillic test payloads as `\uXXXX` JSON escapes or `--data-binary @file` — Git Bash mangles raw Cyrillic in curl args. `api/.htaccess` isn't applied by `php -S`.
 - **Old Node backend** (`server/`, not deployed — kept for a possible future VPS): `cd server && npm install && cp .env.example .env`, then `npm run dev` (nodemon) or `npm start`. See `server/README.md` for the full local-run and VPS-deploy checklist. `server/` has its own `.gitignore`-d `node_modules/`, `.env`, and `data/` (the SQLite file) — `package-lock.json` IS committed.
 - **Running the full stack locally**: two processes — backend `cd server && npm run dev` (port 3000) and frontend `npx serve . -l 5500` from the repo root (pick a port other than 3000, `serve` defaults to it). Open the site via that `http://localhost:5500`, **not** `file://`: the backend's CORS allows exactly one origin (`CORS_ORIGIN` in `server/.env`), so for local testing set it to the exact address in the browser bar (`localhost` and `127.0.0.1` count as different origins), and set it back to `https://legomario11113-star.github.io` before deploying. `.env` is read only at startup — restart after editing it. Never re-run `cp .env.example .env` on a configured setup, it overwrites the real values. With `SMTP_*` empty, submissions are still saved and the API returns `{ ok: true, warning }`; there is no email/delivery log in the DB (only the `submissions` table). SMTP for the owner's mailbox is `smtp.mail.ru:465` with a Mail.ru "app password" (real credentials live only in the git-ignored `.env`).
 - **Stopping stray processes** on Windows PowerShell: `Stop-Process -Id (Get-NetTCPConnection -LocalPort 3000 -State Listen).OwningProcess -Force` (same for 5500); an `ObjectNotFound` error just means nothing is listening.
@@ -86,8 +86,9 @@ SSL Let's Encrypt включить, когда домен заработает);
 `cr949641.tw1.ru`. Деплоя через git/CI нет: пользователь загружает файлы через
 файловый менеджер Timeweb, обычно zip-архивом, который Claude собирает
 Windows-овским `tar.exe -a -c -f x.zip ...` (`tar` из Git Bash делает tar, а
-не zip). Загружать только `index.html`, `css/`, `js/`, `assets/`, `cases/`,
-`api/` (с настоящим `api/config.php`) — никогда `server/`, `CLAUDE.md`,
+не zip). Загружать только `index.html`, `.htaccess` (в корне, редирект
+http→https через `X-Forwarded-Proto`; только когда SSL-сертификат установлен),
+`css/`, `js/`, `assets/`, `cases/`, `api/` (с настоящим `api/config.php`) — никогда `server/`, `CLAUDE.md`,
 `README.md`. Права на хостинге: папки 755, файлы 644. На GitHub Pages ещё
 лежит старая копия, но боевым сайтом она больше не является.
 
@@ -118,13 +119,15 @@ Pages — `https://legomario11113-star.github.io/avilon-it-site/`; origin Pages
   `node_modules`/`package.json`/`package-lock.json`/скриншоты перед коммитом.
   Всё это не должно попадать в git — корень репозитория должен оставаться без
   зависимостей.
-- **Обработчик формы** (`api/request.php`, он и работает на сайте): PHP на
-  компьютере пользователя не установлен. Для теста скачать портативный PHP 8.2
-  NTS zip с `windows.php.net/downloads/releases/` в scratchpad, включить в его
-  `php.ini` `pdo_sqlite`, `openssl`, `mbstring`, скопировать `index.html` +
-  `api/` в `<scratch>/site/public_html/` (чтобы база создалась в
-  `<scratch>/site/data/`, а не в репозитории) и запустить там
-  `php -S 127.0.0.1:8099`. Кириллицу в тестовых запросах слать как
+- **Обработчик формы** (`api/request.php`, он и работает на сайте):
+  портативный PHP 8.2 NTS (с `windows.php.net/downloads/releases/`, в его
+  `php.ini` включены `pdo_sqlite`, `openssl`, `mbstring`) лежит в `C:\php` с
+  2026-10-26 — не в PATH. Пользователь запускает его из корня репозитория:
+  `C:\php\php.exe -c C:\php\php.ini -S 127.0.0.1:8099` и открывает
+  `http://127.0.0.1:8099` (не `npx serve`/порт 5500 — тот не выполняет PHP).
+  Из корня репозитория `db_path` по умолчанию указывает на
+  `Desktop/Avilon_IT/data/submissions.sqlite`, то есть вне репозитория. С
+  настоящим `api/config.php` локальные заявки отправляют реальные письма. Кириллицу в тестовых запросах слать как
   `\uXXXX`-экранирование в JSON или через `--data-binary @файл` — Git Bash
   портит кириллицу в аргументах curl. `api/.htaccess` в `php -S` не действует.
 - **Старый Node-бэкенд** (`server/`, не задеплоен — оставлен на случай VPS):
